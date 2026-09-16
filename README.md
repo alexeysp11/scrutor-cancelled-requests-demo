@@ -1,27 +1,19 @@
-# Scrutor: логирование отменённых HTTP-запросов — пример кода
+# Scrutor: Suppressing Cancelled HTTP Request Logs — Code Showcase
 
-Рабочий пример к статье про подавление шумных `OperationCanceledException` в логах
-через декоратор `ILoggerProvider`, зарегистрированный с помощью
-[Scrutor](https://github.com/khellang/Scrutor), плюс обе неудачные попытки решения и
-два дополнительных сценария декорирования того же вида.
+[English](README.md) | [Русский](README.ru.md)
 
-## Структура
+A working demo project for the article on suppressing noisy `OperationCanceledException` logs using an `ILoggerProvider` decorator registered via [Scrutor](https://github.com/khellang/Scrutor). This repository includes the production-ready solution, both unsuccessful architectural approaches, and two additional decoration scenarios.
 
-- `src/Demo.Logging` — рабочее решение: `CancelledHttpLoggerProvider` + `CancelledHttpLogger`.
-- `src/Demo.FailedAttempts` — обе неудачные попытки: фильтр в `nlog.config` и middleware,
-  которое перехватывает исключение слишком поздно (см. `README.md` внутри).
-- `src/Demo.Scenarios` — два дополнительных сценария декорирования через Scrutor:
-  retry-обёртка вокруг HTTP-клиента и аудит изменений через `IHttpContextAccessor`.
-- `src/Demo.Api` — минимальный ASP.NET Core API, в котором всё это зарегистрировано
-  и подключено вместе.
-- `src/Demo.Benchmarks` — бенчмарки на BenchmarkDotNet для раздела «А что по перформансу?»:
-  сравнение вызова `ILogger.Log(...)` без декоратора, с декоратором (лог проходит насквозь)
-  и с декоратором (лог подавляется).
-- `tests/Demo.Tests` — тесты, подтверждающие поведение из статьи: подавление отмен,
-  отсутствие `NullReferenceException` вне HTTP-запроса, декорирование сразу всех
-  `ILoggerProvider`, ретраи и аудит.
+## Project Structure
 
-## Запуск
+- `src/Demo.Logging` — The working solution: `CancelledHttpLoggerProvider` and `CancelledHttpLogger`.
+- `src/Demo.FailedAttempts` — Both unsuccessful approaches: an `nlog.config` filter and a custom middleware that catches the exception too late (see the dedicated `README.md` inside).
+- `src/Demo.Scenarios` — Two additional Scrutor decoration use cases: a retry wrapper around an HTTP client and an audit logging mechanism via `IHttpContextAccessor`.
+- `src/Demo.Api` — A minimal ASP.NET Core API with all decorators wired up and registered.
+- `src/Demo.Benchmarks` — `BenchmarkDotNet` suite: it compares raw `ILogger.Log(...)` invocation, a decorator passing the log through, and a decorator suppressing the log.
+- `tests/Demo.Tests` — Unit and integration tests validating the behavior described in the article: log suppression, `NullReferenceException` prevention outside HTTP context, multi-provider decoration side-effects, retries, and auditing.
+
+## Getting Started
 
 ```bash
 dotnet test
@@ -29,11 +21,6 @@ dotnet run --project src/Demo.Api
 dotnet run -c Release --project src/Demo.Benchmarks
 ```
 
-Эндпоинт `GET /slow` эмулирует долгую операцию на 10 секунд — если оборвать запрос
-раньше (закрыть вкладку браузера или `curl --max-time 1 http://localhost:<port>/slow`),
-в консоли не появится запись об ошибке: `CancelledHttpLoggerProvider` её подавит.
+The `GET /slow` endpoint simulates a long-running 10-second operation. If you abort the request early (by closing the browser tab or running `curl --max-time 1 http://localhost:<port>/slow`), no error log will appear in the console — the `CancelledHttpLoggerProvider` will successfully suppress it.
 
-Бенчмарки нужно запускать в конфигурации `Release` (BenchmarkDotNet сам откажется
-работать в `Debug`). Абсолютные числа зависят от железа, на котором запускаете, —
-воспроизводить стоит соотношение между сценариями и отсутствие аллокаций, а не
-конкретные наносекунды из статьи.
+Benchmarks must be run in the `Release` configuration (`BenchmarkDotNet` will reject running in `Debug`). Please note that absolute numbers depend heavily on your hardware. When replicating, look for the performance ratios between scenarios and the zero-allocation behavior, rather than the exact nanoseconds mentioned in the article.
