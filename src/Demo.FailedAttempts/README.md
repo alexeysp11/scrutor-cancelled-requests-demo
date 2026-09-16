@@ -1,19 +1,14 @@
-# Неудачные попытки
+# Unsuccessful Approaches
 
-Этот проект не участвует в решении — он собирается вместе с остальными, чтобы обе
-неудачные попытки можно было прочитать и потрогать, а не только увидеть в виде сниппета
-в статье.
+[English](README.md) | [Русский](README.ru.md)
 
-## Попытка №1 — `nlog.config.attempt.xml`
+This project does not participate in the final solution. It is included in the build solely so that both unsuccessful approaches can be inspected and run locally, rather than just seen as snippets in the article.
 
-Фильтр NLog по типу исключения (`contains('${exception:format=Type}', 'OperationCanceledException')`).
-Не работает, потому что фильтрует по *типу* исключения, а нужно фильтровать по *причине*
-(отменил ли запрос конкретно пользователь) — а эта информация недоступна конфигурации
-логгера.
+## Approach #1 — `nlog.config.attempt.xml`
 
-## Попытка №2 — `SuppressCancelledRequestLoggingMiddleware.cs`
+An NLog filter based on the exception type (`contains('${exception:format=Type}', 'OperationCanceledException')`).
+This does not work because it filters strictly by the exception *type*, whereas we need to filter by the *root cause* (whether the request was explicitly aborted by the user). This context is entirely unavailable to the logger configuration.
 
-Middleware, перехватывающее необработанное исключение на верхнем уровне HTTP-конвейера.
-Работает только если исключение долетает до middleware необработанным. `OrderRepositoryWithOwnLogging.cs`
-показывает случай, где это не так: репозиторий логирует исключение сам, до того как оно
-поднимется до middleware, — и `try/catch` в middleware в этот момент уже бесполезен.
+## Approach #2 — `SuppressCancelledRequestLoggingMiddleware.cs`
+
+A custom middleware designed to catch unhandled exceptions at the top of the HTTP pipeline. This only works if the exception propagates all the way up to the middleware unhandled. The `OrderRepositoryWithOwnLogging.cs` class demonstrates a scenario where this approach fails: the repository logs the exception internally before it can propagate upward, rendering the middleware's `try/catch` block completely useless.
