@@ -6,44 +6,6 @@ using Demo.Scenarios;
 
 namespace Demo.Tests;
 
-internal sealed class ThrowsOnceThenSucceedsPaymentClient : IPaymentGatewayClient
-{
-    private int _calls;
-
-    public Task<PaymentResult> ChargeAsync(PaymentRequest request, CancellationToken ct)
-    {
-        _calls++;
-        if (_calls == 1)
-        {
-            throw new HttpRequestException("transient network error");
-        }
-
-        return Task.FromResult(new PaymentResult(true, "tx-1"));
-    }
-}
-
-internal sealed class RecordingOrderRepository : IOrderRepository
-{
-    public List<Order> Saved { get; } = [];
-
-    public Task SaveAsync(Order order, CancellationToken ct)
-    {
-        Saved.Add(order);
-        return Task.CompletedTask;
-    }
-}
-
-internal sealed class RecordingAuditLog : IAuditLog
-{
-    public List<string> Messages { get; } = [];
-
-    public Task RecordAsync(string message, CancellationToken ct)
-    {
-        Messages.Add(message);
-        return Task.CompletedTask;
-    }
-}
-
 public class ScenarioDecoratorTests
 {
     [Fact]

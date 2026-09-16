@@ -55,23 +55,3 @@ app.MapPost("/orders/{id}", async (string id, IOrderRepository repository, Cance
 .WithName("SaveOrder");
 
 app.Run();
-
-internal sealed class FakePaymentGatewayClient : IPaymentGatewayClient
-{
-    public Task<PaymentResult> ChargeAsync(PaymentRequest request, CancellationToken ct) =>
-        Task.FromResult(new PaymentResult(true, Guid.NewGuid().ToString("N")));
-}
-
-internal sealed class InMemoryOrderRepository : IOrderRepository
-{
-    public Task SaveAsync(Order order, CancellationToken ct) => Task.CompletedTask;
-}
-
-internal sealed class ConsoleAuditLog(ILogger<ConsoleAuditLog> logger) : IAuditLog
-{
-    public Task RecordAsync(string message, CancellationToken ct)
-    {
-        logger.LogInformation("[AUDIT] {Message}", message);
-        return Task.CompletedTask;
-    }
-}

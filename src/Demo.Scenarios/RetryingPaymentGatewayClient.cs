@@ -2,15 +2,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Demo.Scenarios;
 
-public sealed record PaymentRequest(string OrderId, decimal Amount);
-
-public sealed record PaymentResult(bool Success, string? TransactionId);
-
-public interface IPaymentGatewayClient
-{
-    Task<PaymentResult> ChargeAsync(PaymentRequest request, CancellationToken ct);
-}
-
 /// <summary>
 /// Retry decorator around <see cref="IPaymentGatewayClient"/>. Register with Scrutor:
 /// <code>services.Decorate&lt;IPaymentGatewayClient, RetryingPaymentGatewayClient&gt;();</code>
