@@ -4,13 +4,17 @@ using Microsoft.Extensions.Logging;
 
 namespace Demo.Logging.Extensions;
 
+/// <summary>
+/// Provides extension methods for setting up log suppression in an <see cref="IServiceCollection"/>.
+/// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Suppress OperationCanceledException caused by HTTP request cancellation.
+    /// Registers infrastructure components to suppress noisy <see cref="OperationCanceledException"/> logs 
+    /// caused by aborted HTTP requests.
     /// </summary>
-    /// <param name="services"></param>
-    /// <returns></returns>
+    /// <param name="services">The <see cref="IServiceCollection"/> to add the services to.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> instance for chaining configuration calls.</returns>
     public static IServiceCollection AddCancelledRequestLogSuppression(this IServiceCollection services)
     {
         services.AddHttpContextAccessor();

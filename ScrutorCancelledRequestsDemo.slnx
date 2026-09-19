@@ -5,6 +5,6 @@
     <Project Path="src/Demo.Logging/Demo.Logging.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/Demo.Tests/Demo.Tests.csproj" />
+    <Project Path="tests/Demo.Logging.Tests/Demo.Logging.Tests.csproj" />
   </Folder>
 </Solution>

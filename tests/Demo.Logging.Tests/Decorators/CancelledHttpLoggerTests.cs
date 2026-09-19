@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Demo.Logging.Decorators;
-using Demo.Tests.Decorators.Fakes;
+using Demo.Logging.Tests.Decorators.Fakes;
 
-namespace Demo.Tests.Decorators;
+namespace Demo.Logging.Tests.Decorators;
 
 public class CancelledHttpLoggerTests
 {
@@ -25,7 +25,7 @@ public class CancelledHttpLoggerTests
     }
 
     [Fact]
-    public void Suppresses_OperationCanceledException_when_request_was_aborted()
+    public void Suppresses_OperationCanceledException_WhenRequestWasAborted()
     {
         var (sink, decorator, accessor) = CreateSut();
 
@@ -42,7 +42,7 @@ public class CancelledHttpLoggerTests
     }
 
     [Fact]
-    public void Logs_normal_errors_even_when_request_was_aborted()
+    public void LogsNormalErrors_EvenWhenRequestWasAborted()
     {
         var (sink, decorator, accessor) = CreateSut();
 
@@ -60,7 +60,7 @@ public class CancelledHttpLoggerTests
     }
 
     [Fact]
-    public void Logs_OperationCanceledException_when_request_was_not_aborted()
+    public void LogsOperationCanceledException_WhenRequestWasNotAborted()
     {
         var (sink, decorator, accessor) = CreateSut();
 
@@ -73,7 +73,7 @@ public class CancelledHttpLoggerTests
     }
 
     [Fact]
-    public void Does_not_throw_when_HttpContext_is_null_eg_background_job()
+    public void DoesNotThrow_WhenHttpContextIsNull_eg_background_job()
     {
         var (sink, decorator, accessor) = CreateSut();
 
@@ -88,7 +88,7 @@ public class CancelledHttpLoggerTests
     }
 
     [Fact]
-    public void Decorating_ILoggerProvider_wraps_every_registered_provider()
+    public void DecoratingILoggerProvider_WrapsEveryRegisteredProvider()
     {
         var services = new ServiceCollection();
         services.AddSingleton<ILoggerProvider>(new RecordingLoggerProvider());
