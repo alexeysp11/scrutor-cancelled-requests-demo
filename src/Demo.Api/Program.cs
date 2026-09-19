@@ -1,4 +1,4 @@
-using Demo.Logging;
+using Demo.Logging.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

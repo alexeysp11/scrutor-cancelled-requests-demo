@@ -1,6 +1,6 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using Demo.Logging;
+using Demo.Logging.Decorators;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 

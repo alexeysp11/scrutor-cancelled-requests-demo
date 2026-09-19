@@ -1,9 +1,10 @@
+using Demo.Logging.Decorators;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Demo.Logging;
+namespace Demo.Logging.Extensions;
 
-public static class DependencyInjection
+public static class ServiceCollectionExtensions
 {
     /// <summary>
     /// Suppress OperationCanceledException caused by HTTP request cancellation.

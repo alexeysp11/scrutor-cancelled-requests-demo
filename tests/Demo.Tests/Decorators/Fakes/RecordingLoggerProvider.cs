@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Demo.Tests;
+namespace Demo.Tests.Decorators.Fakes;
 
 /// <summary>
 /// Test double that records every message it receives, without any real sink behind it.

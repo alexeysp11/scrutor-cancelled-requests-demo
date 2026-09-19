@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Demo.Logging;
+using Demo.Logging.Decorators;
+using Demo.Tests.Decorators.Fakes;
 
-namespace Demo.Tests;
+namespace Demo.Tests.Decorators;
 
 public class CancelledHttpLoggerTests
 {
