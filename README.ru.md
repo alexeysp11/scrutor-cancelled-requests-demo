@@ -1,26 +1,51 @@
-# Scrutor: логирование отменённых HTTP-запросов — пример кода
+# Подавление логов отмены HTTP-запросов с помощью Scrutor
 
-[English](README.md) | [Русский](README.ru.md)
+Пример подавления логов `OperationCanceledException`, возникающих при обрыве соединения клиентом в ASP.NET Core. Решение реализовано через декоратор `ILoggerProvider` с использованием библиотеки [Scrutor](https://github.com).
 
-Рабочий пример к статье про подавление шумных `OperationCanceledException` в логах через декоратор `ILoggerProvider`, зарегистрированный с помощью [Scrutor](https://github.com/khellang/Scrutor), плюс обе неудачные попытки решения и два дополнительных сценария декорирования того же вида.
+## Структура проекта
 
-## Структура
+- `src/Demo.Logging` — Компоненты решения (`CancelledHttpLoggerProvider` и `CancelledHttpLogger`).
+- `src/Demo.Api` — Минимальный API на ASP.NET Core с регистрацией декоратора.
+- `src/Demo.Benchmarks` — Бенчмарки BenchmarkDotNet для сравнения производительности прямого и декорированного логирования.
+- `tests/Demo.Tests` — Юнит- и интеграционные тесты.
 
-- `src/Demo.Logging` — рабочее решение: `CancelledHttpLoggerProvider` + `CancelledHttpLogger`.
-- `src/Demo.FailedAttempts` — неудачные попытки: фильтр в `nlog.config` и middleware, которое перехватывает исключение слишком поздно (см. `README.md` внутри).
-- `src/Demo.Scenarios` — два дополнительных сценария декорирования через Scrutor: retry-обёртка вокруг HTTP-клиента и аудит изменений через `IHttpContextAccessor`.
-- `src/Demo.Api` — минимальный ASP.NET Core API, в котором всё это зарегистрировано и подключено вместе.
-- `src/Demo.Benchmarks` — бенчмарки на BenchmarkDotNet: сравнение вызова `ILogger.Log(...)` без декоратора, с декоратором (лог проходит насквозь) и с декоратором (лог подавляется).
-- `tests/Demo.Tests` — тесты, подтверждающие поведение из статьи: подавление отмен, отсутствие `NullReferenceException` вне HTTP-запроса, декорирование сразу всех `ILoggerProvider`, ретраи и аудит.
+---
 
-## Запуск
+## Запуск приложения
 
 ```bash
-dotnet test
 dotnet run --project src/Demo.Api
+```
+Сервер слушает HTTP (порт `5241`) и HTTPS (порт `7040`).
+
+---
+
+## Проверка через curl
+
+Для проверки поведения используется эндпоинт `GET /slow` (эмулирует задержку в 3 секунды):
+
+### Тестирование через HTTPS
+* **Успешный запрос:**
+  ```bash
+  curl -k -L --max-time 5 https://localhost:7040/slow
+  ```
+  *Логи приложения:* Появятся обе записи `"Started..."` и `"Finished..."`.
+
+* **Прерванный запрос (Проверка подавления):**
+  ```bash
+  curl -k -L --max-time 1 https://localhost:7040/slow
+  ```
+  *Логи приложения:* Выведется **только** запись `"Started..."`. Системный стек-трейс ошибки `OperationCanceledException` от Kestrel/ASP.NET Core будет подавлен.
+
+### Тестирование через HTTP
+* **Прерывание на старте:** `curl --max-time 1 http://localhost:5241/slow` (Запрос завершается на этапе Middleware редиректа; подавление лога эндпоинта не происходит).
+* **Выполнение до конца:** `curl --max-time 5 http://localhost:5241/slow` (Возвращает статус `307 Temporary Redirect`).
+
+---
+
+## Запуск бенчмарков
+
+```bash
 dotnet run -c Release --project src/Demo.Benchmarks
 ```
-
-Эндпоинт `GET /slow` эмулирует долгую операцию на 10 секунд — если оборвать запрос раньше (закрыть вкладку браузера или `curl --max-time 1 http://localhost:<port>/slow`), в консоли не появится запись об ошибке: `CancelledHttpLoggerProvider` её подавит.
-
-Бенчмарки нужно запускать в конфигурации `Release` (BenchmarkDotNet сам откажется работать в `Debug`). Абсолютные числа зависят от железа, на котором запускаете, — воспроизводить стоит соотношение между сценариями и отсутствие аллокаций, а не конкретные наносекунды из статьи.
+При анализе результатов оценивайте соотношение скорости сценариев и отсутствие аллокаций, а не конкретные наносекунды.

@@ -16,24 +16,17 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// A long-running endpoint that can be cancelled (Ctrl+C in curl / closing the browser tab)
-// to see log suppression in action.
+// Use a long-running operation to simulate a request that can be aborted by the client.
 app.MapGet("/slow", async (HttpContext context, ILogger<Program> logger, CancellationToken ct) =>
 {
     logger.LogInformation("Started a long operation for {Path}", context.Request.Path);
-    try
-    {
-        await Task.Delay(TimeSpan.FromSeconds(10), ct);
-        return Results.Ok("Done");
-    }
-    catch (OperationCanceledException ex)
-    {
-        // If the request is cancelled, this exception will propagate to both our code
-        // and the ILoggerProvider below. CancelledHttpLoggerProvider will suppress
-        // logging it if the exception resulted from the cancellation of the current HTTP request.
-        logger.LogError(ex, "A long-running operation for {Path} was cancelled or failed", context.Request.Path);
-        throw;
-    }
+
+    // If the client cancels the request, Task.Delay throws OperationCanceledException.
+    // The exception bubbles up to ASP.NET Core infrastructure, where our decorator suppresses the log.
+    await Task.Delay(TimeSpan.FromSeconds(3), ct);
+
+    logger.LogInformation("Finished a long operation for {Path}", context.Request.Path);
+    return Results.Ok("Done");
 })
 .WithName("Slow");
 
