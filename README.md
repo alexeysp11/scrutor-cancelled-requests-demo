@@ -20,11 +20,11 @@ The server listens on HTTP (port `5241`) and HTTPS (port `7040`).
 
 ---
 
-## Verifying via curl
+### Verifying via curl
 
 Test the `GET /slow` endpoint (simulates a 3-second delay) to check the log suppression behavior:
 
-### HTTPS Verification (Handles redirection)
+#### HTTPS Verification (Handles redirection)
 * **Successful execution:**
   ```bash
   curl -k -L --max-time 5 https://localhost:7040/slow
@@ -37,7 +37,7 @@ Test the `GET /slow` endpoint (simulates a 3-second delay) to check the log supp
   ```
   *Console output:* Prints **only** the `"Started..."` log. The standard Kestrel/ASP.NET Core `OperationCanceledException` error stack trace is suppressed.
 
-### HTTP Verification (Bypasses endpoint via 307 redirect)
+#### HTTP Verification (Bypasses endpoint via 307 redirect)
 * **Aborted early:** `curl --max-time 1 http://localhost:5241/slow` (Terminates at the redirection middleware; no suppression occurs).
 * **Full execution:** `curl --max-time 5 http://localhost:5241/slow` (Returns a `307 Temporary Redirect`).
 

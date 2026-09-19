@@ -20,11 +20,11 @@ dotnet run --project src/Demo.Api
 
 ---
 
-## Проверка через curl
+### Проверка через curl
 
 Для проверки поведения используется эндпоинт `GET /slow` (эмулирует задержку в 3 секунды):
 
-### Тестирование через HTTPS
+#### Тестирование через HTTPS
 * **Успешный запрос:**
   ```bash
   curl -k -L --max-time 5 https://localhost:7040/slow
@@ -37,7 +37,7 @@ dotnet run --project src/Demo.Api
   ```
   *Логи приложения:* Выведется **только** запись `"Started..."`. Системный стек-трейс ошибки `OperationCanceledException` от Kestrel/ASP.NET Core будет подавлен.
 
-### Тестирование через HTTP
+#### Тестирование через HTTP
 * **Прерывание на старте:** `curl --max-time 1 http://localhost:5241/slow` (Запрос завершается на этапе Middleware редиректа; подавление лога эндпоинта не происходит).
 * **Выполнение до конца:** `curl --max-time 5 http://localhost:5241/slow` (Возвращает статус `307 Temporary Redirect`).
 
