@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Demo.Logging.Tests.Extensions;
 
-public class ServiceCollectionExtensionsTests
+public sealed class ServiceCollectionExtensionsTests
 {
     [Fact]
     public void AddCancelledRequestLogSuppression_ShouldRegisterRequiredServicesAndDecorateLoggerProvider()

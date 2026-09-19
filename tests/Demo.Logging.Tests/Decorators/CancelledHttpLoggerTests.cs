@@ -6,7 +6,7 @@ using Demo.Logging.Tests.Decorators.Fakes;
 
 namespace Demo.Logging.Tests.Decorators;
 
-public class CancelledHttpLoggerTests
+public sealed class CancelledHttpLoggerTests
 {
     private static (RecordingLoggerProvider sink, ILoggerProvider decorator, IHttpContextAccessor accessor) CreateSut()
     {
