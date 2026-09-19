@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Demo.Logging\Demo.Logging.csproj" />
-    <ProjectReference Include="..\..\src\Demo.Scenarios\Demo.Scenarios.csproj" />
   </ItemGroup>
 
   <ItemGroup>
