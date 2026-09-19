@@ -2,6 +2,66 @@
 
 Demonstration of suppressing `OperationCanceledException` logs caused by client disconnections in ASP.NET Core applications using an `ILoggerProvider` decorator configured via [Scrutor](https://github.com).
 
+---
+
+## Background
+
+### Problem
+In ASP.NET Core web applications, when a client prematurely aborts an HTTP request (e.g., closes a browser tab or cancels a `curl` invocation), underlying asynchronous operations throw an `OperationCanceledException`. By default, this exception propagates up to the Kestrel infrastructure or standard middleware, flooding the application console and log storage with noisy, low-value `ERROR` level stack traces.
+
+### Solution
+Instead of scattering boilerplate `try-catch` blocks across every endpoint or controller, this repository demonstrates a centralized approach:
+1. Register `IHttpContextAccessor` to track active web requests.
+2. Intercept and decorate all registered `ILoggerProvider` instances using **Scrutor**.
+3. Inspect incoming exceptions inside the custom logger: if an `OperationCanceledException` correlates with `HttpContext.RequestAborted.IsCancellationRequested`, the log entry is silently dropped. All other logs pass through untouched.
+
+The code for the decorator provider and the logger that filters out unnecessary entries might look something like this:
+```csharp
+public sealed class CancelledHttpLoggerProvider(
+    ILoggerProvider inner,
+    IHttpContextAccessor accessor) : ILoggerProvider
+{
+    public ILogger CreateLogger(string categoryName) =>
+        new CancelledHttpLogger(inner.CreateLogger(categoryName), accessor);
+
+    public void Dispose() => inner.Dispose();
+}
+
+public sealed class CancelledHttpLogger(
+    ILogger inner,
+    IHttpContextAccessor accessor) : ILogger
+{
+    public IDisposable? BeginScope<TState>(TState state) where TState : notnull =>
+        inner.BeginScope(state);
+
+    public bool IsEnabled(LogLevel logLevel) => inner.IsEnabled(logLevel);
+
+    public void Log<TState>(
+        LogLevel logLevel,
+        EventId eventId,
+        TState state,
+        Exception? exception,
+        Func<TState, Exception?, string> formatter)
+    {
+        if (exception is OperationCanceledException &&
+            accessor.HttpContext?.RequestAborted.IsCancellationRequested == true)
+        {
+            return;
+        }
+
+        inner.Log(logLevel, eventId, state, exception, formatter);
+    }
+}
+```
+
+and registration:
+```csharp
+services.AddHttpContextAccessor();
+services.Decorate<ILoggerProvider, CancelledHttpLoggerProvider>();
+```
+
+---
+
 ## Project Structure
 
 - `src/Demo.Logging` — Core logic (`CancelledHttpLoggerProvider` and `CancelledHttpLogger`).
