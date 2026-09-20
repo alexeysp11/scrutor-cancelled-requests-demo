@@ -1,5 +1,7 @@
 # HTTP Request Cancellation Log Suppression via Scrutor
 
+[English](README.md) | [Русский](README.ru.md)
+
 Demonstration of suppressing `OperationCanceledException` logs caused by client disconnections in ASP.NET Core applications using an `ILoggerProvider` decorator configured via [Scrutor](https://github.com).
 
 ---

@@ -1,5 +1,7 @@
 # Подавление логов отмены HTTP-запросов с помощью Scrutor
 
+[English](README.md) | [Русский](README.ru.md)
+
 Пример подавления логов `OperationCanceledException`, возникающих при обрыве соединения клиентом в ASP.NET Core. Решение реализовано через декоратор `ILoggerProvider` с использованием библиотеки [Scrutor](https://github.com).
 
 ---
